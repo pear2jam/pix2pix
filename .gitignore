@@ -148,6 +148,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 .dmypy.json
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 dmypy.json
 
 # Pyre type checker
@@ -160,5 +164,10 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+<<<<<<< HEAD
+=======
+.idea
+dataset
+>>>>>>> master
 =======
 >>>>>>> a6fd200 (Initial commit)

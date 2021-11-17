@@ -29,7 +29,7 @@ dis = tools.Discriminator()
 
 gen.train()  # тренировочный режим
 dis.train()
-data = dp.split(data, turned_add=True, rotate_add=True, part=-0.1, info=True)
+data = dp.split(data, turned_add=True, rotate_add=True, part=0.1, info=True)
 from torchvision.utils import save_image
 print(len(data))
 save_image(data[40][1], 'g.png')

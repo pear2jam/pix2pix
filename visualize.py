@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPainter, QPixmap, QColor
 
 
 class Ui_MainWindow(object):
@@ -35,12 +36,16 @@ class Ui_MainWindow(object):
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 170, 320, 320))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("../../../Users/MSI Bravo/Desktop/photos/лагерь/IMG_7287.JPG"))
+        self.label.pixmap = QPixmap()
+        self.label.pixmap.fill(QColor(255, 255, 255))
+        self.label.setStyleSheet("border : 2px solid black; background-color: white")
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(440, 170, 320, 320))
         self.label_2.setText("")
-        self.label_2.setPixmap(QtGui.QPixmap("../../../Users/MSI Bravo/Desktop/photos/лагерь/IMG_7287.JPG"))
+        self.label_2.pixmap = QPixmap()
+        self.label_2.pixmap.fill(QColor(255, 255, 255))
+        self.label_2.setStyleSheet("border : 2px solid black; background-color: white")
         self.label_2.setObjectName("label_2")
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setGeometry(QtCore.QRect(230, 20, 161, 51))
@@ -106,10 +111,25 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Pix2pix"))
         self.pushButton.setText(_translate("MainWindow", "Draw"))
         self.pushButton_2.setText(_translate("MainWindow", "Erase"))
         self.pushButton_3.setText(_translate("MainWindow", "Clear"))
         self.pushButton_4.setText(_translate("MainWindow", "Run"))
         self.label_3.setText(_translate("MainWindow", "Input"))
         self.label_4.setText(_translate("MainWindow", "Output"))
+
+    def paintEvent(self, event):
+        canvasPainter = QPainter(self)
+        canvasPainter.drawImage(self.rect(), self.image,
+                                self.image.rect())
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

@@ -9,9 +9,6 @@ import torchvision.transforms as tt  # для обработки данных
 import pickle  # для сохранения / загрузки модели
 
 
-from torchvision.datasets.utils import download_file_from_google_drive
-
-
 def save(to_save, name="model.pkl"):
     with open(name, "wb") as f:
         pickle.dump(to_save, f)
@@ -37,10 +34,8 @@ gen.train()
 
 gen.train()  # тренировочный режим
 dis.train()
+
 data = dp.split(data, turned_add=True, rotate_add=True, part=0.1, info=True)
-from torchvision.utils import save_image
-print(len(data))
-save_image(data[40][1], 'g.png')
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 

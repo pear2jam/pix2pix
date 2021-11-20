@@ -9,14 +9,15 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPainter, QPixmap, QColor
+from PyQt5.QtGui import QPainter, QPixmap, QColor, QPen
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 530)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_MainWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setObjectName("MainWindow")
+        self.resize(800, 530)
+        self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(50, 20, 161, 51))
@@ -33,11 +34,13 @@ class Ui_MainWindow(object):
         self.pushButton.setAutoFillBackground(False)
         self.pushButton.setStyleSheet("background : rgb(250, 255, 233); border-radius : 50; border : 2px solid black")
         self.pushButton.setObjectName("pushButton")
+        self.pushButton.clicked.connect(self.draw_set)
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 170, 320, 320))
         self.label.setText("")
-        self.label.pixmap = QPixmap()
-        self.label.pixmap.fill(QColor(255, 255, 255))
+        self.label.setPixmap(QtGui.QPixmap(400, 300))
+        self.label.pixmap().fill(QColor(255, 255, 255))
+        self.label.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.label.setStyleSheet("border : 2px solid black; background-color: white")
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
@@ -50,6 +53,7 @@ class Ui_MainWindow(object):
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setGeometry(QtCore.QRect(230, 20, 161, 51))
         self.pushButton_2.setSizeIncrement(QtCore.QSize(0, 0))
+        self.pushButton_2.clicked.connect(self.erase_set)
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setBold(False)
@@ -104,10 +108,15 @@ class Ui_MainWindow(object):
         font.setPointSize(21)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.setCentralWidget(self.centralwidget)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.painter = QtGui.QPainter(self.label.pixmap())
+        self.pen = QPen(QtCore.Qt.black)
+        self.pen.setWidth(3)
+        self.painter.setPen(self.pen)
+
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -119,17 +128,28 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Input"))
         self.label_4.setText(_translate("MainWindow", "Output"))
 
-    def paintEvent(self, event):
-        canvasPainter = QPainter(self)
-        canvasPainter.drawImage(self.rect(), self.image,
-                                self.image.rect())
+    def draw_set(self):
+        self.pen = QPen(QtCore.Qt.black)
+        self.pen.setWidth(3)
+
+        self.painter.setPen(self.pen)
+
+    def erase_set(self):
+        self.pen = QPen(QtCore.Qt.white)
+        self.pen.setWidth(18)
+        self.painter.setPen(self.pen)
+
+    def mouseMoveEvent(self, e):
+        self.painter.drawPoint(e.x()-40, e.y()-180)
+        self.update()
+
 
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
+    #MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    #ui.setupUi(MainWindow)
+    ui.show()
     sys.exit(app.exec_())

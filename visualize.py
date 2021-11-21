@@ -1,5 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPainter, QPixmap, QColor, QPen
+from PyQt5.QtGui import QPainter, QPixmap, QColor, QPen, QImage
+import numpy as np
+import torch
+import warnings
+from torchvision.utils import save_image
+from PIL import Image
+from torchvision import transforms as tf
+import pickle
+from tools.data_preparation import move_to
+
+def load(name="model.pkl"):
+    with open(name, "rb") as f:
+        return pickle.load(f)
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -31,7 +43,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 170, 320, 320))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(400, 300))
+        self.label.setPixmap(QtGui.QPixmap(320, 320))
         self.label.pixmap().fill(QColor(255, 255, 255))
         self.label.setCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
         self.label.setStyleSheet("border : 2px solid black; background-color: white")
@@ -40,8 +52,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(440, 170, 320, 320))
         self.label_2.setText("")
-        self.label_2.pixmap = QPixmap()
-        self.label_2.pixmap.fill(QColor(255, 255, 255))
+        self.label_2.setPixmap(QtGui.QPixmap(320, 320))
+        self.label_2.pixmap().fill(QColor(255, 255, 255))
         self.label_2.setStyleSheet("border : 2px solid black; background-color: white")
         self.label_2.setObjectName("label_2")
 
@@ -70,6 +82,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pushButton_4.setAutoFillBackground(False)
         self.pushButton_4.setStyleSheet("background : rgb(255, 233, 179); border-radius : 50; border : 2px solid black")
         self.pushButton_4.setObjectName("pushButton_4")
+        self.pushButton_4.clicked.connect(self.generate)
         #font for labels
         font = QtGui.QFont()
         font.setPointSize(21)
@@ -119,8 +132,32 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label.pixmap().fill(QColor(255, 255, 255))
         self.label.update()
 
+    def generate(self):
+        warnings.filterwarnings('ignore')
+        image_in = self.label.pixmap().toImage()
+        image_in.save("temp_image.png")
+        image_in = Image.open("temp_image.png").convert('RGB')
+        transforms = tf.Compose([tf.Resize(256), tf.ToTensor()])
+        torch_image_in = transforms(image_in)
+
+        torch_image_in = torch_image_in.view(1, 3, 256, 256)
+
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        gen = move_to(load("models/lgenerator.pkl"), device)
+
+        with torch.no_grad():
+            image_out = gen(torch_image_in)[0]
+
+        image_out = tf.Resize(320)(image_out)
+
+        save_image(image_out, "temp_image.png")
+
+        self.label_2.pixmap().convertFromImage(QImage("temp_image.png"))
+        self.label_2.update()
+
+
     def mouseMoveEvent(self, e):
-        self.painter.drawPoint(e.x()-40, e.y()-180)
+        self.painter.drawPoint(e.x()-43, e.y()-170)
         self.update()
 
 

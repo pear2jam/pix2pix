@@ -1,20 +1,22 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPainter, QPixmap, QColor, QPen, QImage
-import numpy as np
+from PyQt5.QtGui import QColor, QPen, QImage
+
 import torch
-import warnings
 from torchvision.utils import save_image
-from PIL import Image
 from torchvision import transforms as tf
+
+from PIL import Image
 import pickle
+
 from tools.data_preparation import move_to
+
 
 def load(name="model.pkl"):
     with open(name, "rb") as f:
         return pickle.load(f)
 
 
-class Ui_MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setObjectName("MainWindow")
@@ -38,7 +40,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pushButton.setAutoFillBackground(False)
         self.pushButton.setStyleSheet("background : rgb(250, 255, 233); border-radius : 50; border : 2px solid black")
         self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(self.draw_set)
 
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(40, 170, 320, 320))
@@ -60,7 +61,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_2.setGeometry(QtCore.QRect(230, 20, 161, 51))
         self.pushButton_2.setSizeIncrement(QtCore.QSize(0, 0))
-        self.pushButton_2.clicked.connect(self.erase_set)
         self.pushButton_2.setFont(font)
         self.pushButton_2.setAutoFillBackground(False)
         self.pushButton_2.setStyleSheet("background : rgb(250, 255, 233); border-radius : 50; border : 2px solid black")
@@ -73,7 +73,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pushButton_3.setAutoFillBackground(False)
         self.pushButton_3.setStyleSheet("background : rgb(250, 255, 233); border-radius : 50; border : 2px solid black")
         self.pushButton_3.setObjectName("pushButton_3")
-        self.pushButton_3.clicked.connect(self.clear_canvas)
 
         self.pushButton_4 = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_4.setGeometry(QtCore.QRect(590, 20, 161, 51))
@@ -82,8 +81,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pushButton_4.setAutoFillBackground(False)
         self.pushButton_4.setStyleSheet("background : rgb(255, 233, 179); border-radius : 50; border : 2px solid black")
         self.pushButton_4.setObjectName("pushButton_4")
-        self.pushButton_4.clicked.connect(self.generate)
-        #font for labels
+
+        # font for labels
         font = QtGui.QFont()
         font.setPointSize(21)
 
@@ -97,25 +96,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
 
-        self.setCentralWidget(self.centralwidget)
-
+        # painter
         self.painter = QtGui.QPainter(self.label.pixmap())
         self.pen = QPen(QtCore.Qt.black)
         self.pen.setWidth(3)
         self.painter.setPen(self.pen)
 
-        self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
+        self.setCentralWidget(self.centralwidget)
 
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Pix2pix"))
-        self.pushButton.setText(_translate("MainWindow", "Draw"))
-        self.pushButton_2.setText(_translate("MainWindow", "Erase"))
-        self.pushButton_3.setText(_translate("MainWindow", "Clear"))
-        self.pushButton_4.setText(_translate("MainWindow", "Run"))
-        self.label_3.setText(_translate("MainWindow", "Input"))
-        self.label_4.setText(_translate("MainWindow", "Output"))
+        self.setWindowTitle("Pix2pix")
+        self.pushButton.setText("Draw")
+        self.pushButton_2.setText("Erase")
+        self.pushButton_3.setText("Clear")
+        self.pushButton_4.setText("Run")
+        self.label_3.setText("Input")
+        self.label_4.setText("Output")
+
+        # buttons functions
+        self.pushButton.clicked.connect(self.draw_set)
+        self.pushButton_2.clicked.connect(self.erase_set)
+        self.pushButton_3.clicked.connect(self.clear_canvas)
+        self.pushButton_4.clicked.connect(self.generate)
 
     def draw_set(self):
         self.pen = QPen(QtCore.Qt.black)
@@ -133,7 +135,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label.update()
 
     def generate(self):
-        warnings.filterwarnings('ignore')
         image_in = self.label.pixmap().toImage()
         image_in.save("temp_image.png")
         image_in = Image.open("temp_image.png").convert('RGB')
@@ -155,7 +156,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.label_2.pixmap().convertFromImage(QImage("temp_image.png"))
         self.label_2.update()
 
-
     def mouseMoveEvent(self, e):
         self.painter.drawPoint(e.x()-43, e.y()-170)
         self.update()
@@ -164,6 +164,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    ui = Ui_MainWindow()
+    ui = MainWindow()
     ui.show()
     sys.exit(app.exec_())

@@ -23,54 +23,34 @@ data = ImageFolder('./dataset/val', transform=tt.Compose([
   tt.ToTensor()
 ]))
 
-
-gen = tools.GeneratorLight()
+gen = tools.Generator()
 dis = tools.Discriminator()
 
-
 gen.train()
-
-
-
-gen.train()  # тренировочный режим
-dis.train()
 
 data = dp.split(data, turned_add=True, rotate_add=True, part=0.1, info=True)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-# перемещаем модели и данные на устройство
 gen = dp.move_to(gen, device)
 dis = dp.move_to(dis, device)
-data = dp.move_to(data, device)
 
-
-"""
-Обучение
-part - часть данных на которых происходит обучение (от 0 до 1: соответственно 0% - 100%)
-glpdl - итераций обучения генератора на итерацию обучения дискриминатора
-backup - нужно ли делать промежуточные бэкапы при обучении
-backup_rate - частота в эпохах, когда делается резервная копия генератора
-lr_gen и lr_dis - learning rate используемая при оптимизации
-"""
-part = 0.1
+part = 0.1  # part of the data on which the model is training
 epochs = 10
 batch_size = 4
 
-lr_gen = 2e-4
+lr_gen = 2e-4  # learning rates for generator and discriminator
 lr_dis = 2e-4
 
-glpdl = 1
+gen_per_dis = 1  # generation learning iterations per discriminator learning iterations
 
-backup = True
-backup_rate = 10
-
+backup = True  # make backups
+backup_rate = 10  # how much epochs for another backup
 
 part_learn = int(len(data) * part)
 
 if batch_size > part_learn:
-    raise()  # здесь кидает исключение что батч больше данных
-
+    raise(Exception("Batch size for than data"))
 
 x_loader = DataLoader(data[:part_learn], batch_size=batch_size, drop_last=True, shuffle=True)
 
@@ -83,15 +63,15 @@ res = res.view(30, 30)
 gen_optim = torch.optim.Adam(gen.parameters(), lr=lr_gen)
 dis_optim = torch.optim.Adam(dis.parameters(), lr=lr_dis)
 
-
-gen_losses = []
-dis_losses = []
 pics = 0
+
+gen_loss, dis_loss = 0, 0
 
 for epoch in range(epochs):
     print(">> ", epoch, " | ", sep="", end="")
     print("from ", part_learn, "p : ", sep="", end="")
     for data in x_loader:
+        data = dp.move_to(data, device)
         X = data[:, 0]
         y = data[:, 1]
 
@@ -101,14 +81,14 @@ for epoch in range(epochs):
         dis_optim.step()
 
         gen_loss = 0
-        for i in range(glpdl):
+        for i in range(gen_per_dis):
             gen_optim.zero_grad()
             gen_loss = loss.generator_loss(X, y, gen, dis)
             gen_loss.backward()
             gen_optim.step()
 
-        gen_losses.append(float(gen_loss))
-        dis_losses.append(float(dis_loss))
+        del data, X, y
+        torch.cuda.empty_cache()
 
         pics += batch_size
         print(pics, end="p ")
@@ -123,6 +103,4 @@ for epoch in range(epochs):
 
     pics = 0
 
-save(dp.move_to(gen, torch.device("cpu")), "models/lgenerator1.pkl")
-
-
+save(dp.move_to(gen, torch.device("cpu")), "models/lgenerator.pkl")

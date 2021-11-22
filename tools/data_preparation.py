@@ -64,7 +64,7 @@ def split(x, turned_add=False, rotate_add=True, max_angle=0.5, part=1, info=True
 
     if info:
         print("100\nfinished")
-        print("images total:", int(size*len(x)*part))
+        print("preparated images total:", int(size*len(x)*part))
     return x_data
 
 

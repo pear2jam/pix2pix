@@ -7,6 +7,7 @@ import tools.data_preparation as dp  # для обработки данных
 import tools.losses as loss  # для функций ошибки
 import torchvision.transforms as tt  # для обработки данных
 import pickle  # для сохранения / загрузки модели
+import time  # для оценки времени
 
 
 def save(to_save, name="model.pkl"):
@@ -67,9 +68,15 @@ pics = 0
 
 gen_loss, dis_loss = 0, 0
 
+print(">>>>>>>>>>>>>")
+print(f"images: {part_learn}")
+
+show_est_time = True
+start_time = time.time()
 for epoch in range(epochs):
-    print(">> ", epoch, " | ", sep="", end="")
-    print("from ", part_learn, "p : ", sep="", end="")
+    if not show_est_time:
+        print(">> ", epoch, " | ", sep="", end="")
+        print("from ", part_learn, "p : ", sep="", end="")
     for data in x_loader:
         data = dp.move_to(data, device)
         X = data[:, 0]
@@ -89,6 +96,20 @@ for epoch in range(epochs):
 
         del data, X, y
         torch.cuda.empty_cache()
+
+        if show_est_time:
+            show_est_time = False
+            batch_time = time.time() - start_time
+            batches = part_learn // batch_size
+            epoch_time = batches * batch_time
+            total_time = epoch_time * epochs
+
+            print("Estimated time:")
+            print(f"batch: {batch_time}s")
+            print(f"epoch: {epoch_time}s")
+            print(f"total: {total_time}s")
+            print(">> ", epoch, " | ", sep="", end="")
+            print("from ", part_learn, "p : ", sep="", end="")
 
         pics += batch_size
         print(pics, end="p ")

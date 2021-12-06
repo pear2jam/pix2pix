@@ -6,14 +6,9 @@ from torchvision.utils import save_image
 from torchvision import transforms as tf
 
 from PIL import Image
-import pickle
 
 from tools.data_preparation import move_to
-
-
-def load(name="model.pkl"):
-    with open(name, "rb") as f:
-        return pickle.load(f)
+from tools.tools import *
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -144,8 +139,11 @@ class MainWindow(QtWidgets.QMainWindow):
         torch_image_in = torch_image_in.view(1, 3, 256, 256)
 
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        gen = move_to(load("models/lgenerator.pkl"), device)
 
+        gen = torch.load('models/backup/backup_2.pth')
+
+        gen = move_to(gen, device)
+        gen.train()
         with torch.no_grad():
             image_out = gen(torch_image_in)[0]
 

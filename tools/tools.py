@@ -21,7 +21,7 @@ class Downsampler(nn.Module):
         return x
 
 
-class DownsamplerLight(nn.Module):
+class Downsampler1(nn.Module):
     def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_batchnorm=False):
         super().__init__()
         self.conv = nn.Conv2d(in_size, out_size, ker_size, stride, padding=padding)
@@ -58,7 +58,7 @@ class Upsampler(nn.Module):
         return x
 
 
-class UpsamplerLight(nn.Module):
+class Upsampler1(nn.Module):
     def __init__(self, in_size, out_size, ker_size, stride, apply_dropout=False, final_act=True):
         super().__init__()
         self.conv_transpose = nn.ConvTranspose2d(in_size, out_size, ker_size, stride)
@@ -112,29 +112,29 @@ class Generator(nn.Module):
         return x
 
 
-class GeneratorLight(nn.Module):
+class Generator1(nn.Module):
     def __init__(self):
         super().__init__()
         self.down_stack = nn.ModuleList([
-            DownsamplerLight(3, 64, 4, 2, 1),  # (batch_size, 128, 128, 64)
-            DownsamplerLight(64, 128, 4, 2, 1),  # (batch_size, 64, 64, 128)
-            DownsamplerLight(128, 256, 4, 2, 1),  # (batch_size, 32, 32, 256)
-            DownsamplerLight(256, 512, 4, 2, 1),  # (batch_size, 16, 16, 512)
-            DownsamplerLight(512, 512, 3, 2, 1),  # (batch_size, 8, 8, 512)
-            DownsamplerLight(512, 512, 3, 2, 1, apply_batchnorm=True),  # (batch_size, 4, 4, 512)
-            DownsamplerLight(512, 512, 3, 1, apply_batchnorm=True),  # (batch_size, 2, 2, 512)
-            DownsamplerLight(512, 512, 2, 1),  # (batch_size, 1, 1, 512)
+            Downsampler1(3, 64, 4, 2, 1),  # (batch_size, 128, 128, 64)
+            Downsampler1(64, 128, 4, 2, 1),  # (batch_size, 64, 64, 128)
+            Downsampler1(128, 256, 4, 2, 1),  # (batch_size, 32, 32, 256)
+            Downsampler1(256, 512, 4, 2, 1),  # (batch_size, 16, 16, 512)
+            Downsampler1(512, 512, 3, 2, 1),  # (batch_size, 8, 8, 512)
+            Downsampler1(512, 512, 3, 2, 1, apply_batchnorm=True),  # (batch_size, 4, 4, 512)
+            Downsampler1(512, 512, 3, 1, apply_batchnorm=True),  # (batch_size, 2, 2, 512)
+            Downsampler1(512, 512, 2, 1),  # (batch_size, 1, 1, 512)
         ])
         self.up_stack = nn.ModuleList([
-            UpsamplerLight(512, 512, 2, 1, apply_dropout=True),  # (batch_size, 2, 2, 512)
-            UpsamplerLight(1024, 512, 2, 2, apply_dropout=True),  # (batch_size, 4, 4, 512)
-            UpsamplerLight(1024, 512, 2, 2),  # (batch_size, 8, 8, 512)
-            UpsamplerLight(1024, 512, 2, 2),  # (batch_size, 16, 16, 512)
-            UpsamplerLight(1024, 256, 2, 2),  # (batch_size, 32, 32, 256)
-            UpsamplerLight(512, 128, 2, 2),  # (batch_size, 64, 64, 128)
-            UpsamplerLight(256, 64, 2, 2),  # (batch_size, 128, 128, 64)
+            Upsampler1(512, 512, 2, 1, apply_dropout=True),  # (batch_size, 2, 2, 512)
+            Upsampler1(1024, 512, 2, 2, apply_dropout=True),  # (batch_size, 4, 4, 512)
+            Upsampler1(1024, 512, 2, 2),  # (batch_size, 8, 8, 512)
+            Upsampler1(1024, 512, 2, 2),  # (batch_size, 16, 16, 512)
+            Upsampler1(1024, 256, 2, 2),  # (batch_size, 32, 32, 256)
+            Upsampler1(512, 128, 2, 2),  # (batch_size, 64, 64, 128)
+            Upsampler1(256, 64, 2, 2),  # (batch_size, 128, 128, 64)
         ])
-        self.final = UpsamplerLight(128, 3, 2, 2, final_act=False)  # (batch_size, 256, 256, 3)
+        self.final = Upsampler1(128, 3, 2, 2, final_act=False)  # (batch_size, 256, 256, 3)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):  # x has shape: (batch_size, 256, 256, 3)

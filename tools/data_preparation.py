@@ -4,7 +4,14 @@
 import torch
 import torch.nn.functional as tf
 import warnings
+import logging
 from tools.misc import get_rotate_matrix
+import sys
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.StreamHandler(sys.stderr))
+
+
 
 def split(x, turned_add=False, rotate_add=True, max_angle=0.5, part=1, info=True):
     """
@@ -34,10 +41,10 @@ def split(x, turned_add=False, rotate_add=True, max_angle=0.5, part=1, info=True
     part_len = int(len(x)*part / 20)  # отображение по 5 процентов
     total = -1  # текущие 5 процентов
     if info:
-        print("preparing data %: ", end="")
+        log.info("preparing data %: ", end="")
     for i in range(int(len(x)*part)):
         if info and i // part_len > total:  # обновление процентов
-            print(i // part_len * 5, end=" ")
+            log.info(i // part_len * 5, end=" ")
             total = i // part_len
 
         x_temp = x[i][0].unfold(2, 256, 256).permute(2, 0, 1, 3)
@@ -63,8 +70,8 @@ def split(x, turned_add=False, rotate_add=True, max_angle=0.5, part=1, info=True
             x_data[int(len(x) * part) * shift + i][1] = rot_x[0]
 
     if info:
-        print("100\nfinished")
-        print("preparated images total:", int(size*len(x)*part))
+        log.info("100\nfinished")
+        log.info("preparated images total:", int(size*len(x)*part))
     return x_data
 
 

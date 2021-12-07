@@ -116,7 +116,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def draw_set(self):
         self.pen = QPen(QtCore.Qt.black)
-        self.pen.setWidth(3)
+        self.pen.setWidth(2)
 
         self.painter.setPen(self.pen)
 
@@ -138,14 +138,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         transforms = tf.Compose([tf.Resize(256), tf.ToTensor()])
         torch_image_in = transforms(image_in)
-
+        im_in = torch.FloatTensor(2, 3, 256, 256)
+        im_in[0], im_in[1] = torch_image_in, torch_image_in
         torch_image_in = torch_image_in.view(1, 3, 256, 256)
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         gen = torch.load('models/lgen.pth', map_location='cpu')
-
         gen = move_to(gen, device)
         with torch.no_grad():
-            image_out = gen(torch_image_in)[0]
+            image_out = gen(im_in)[0]
 
         image_out = tf.Resize(320)(image_out)
 

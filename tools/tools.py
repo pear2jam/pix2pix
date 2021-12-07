@@ -21,20 +21,7 @@ class Downsampler(nn.Module):
         return x
 
 
-class Downsampler1(nn.Module):
-    def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_batchnorm=False):
-        super().__init__()
-        self.conv = nn.Conv2d(in_size, out_size, ker_size, stride, padding=padding)
-        self.lrelu = nn.LeakyReLU(2)
-        self.bnorm = nn.BatchNorm2d(out_size)
-        self.b = apply_batchnorm
 
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.lrelu(x)
-        if self.b:
-            x = self.bnorm(x)
-        return x
 
 
 class Upsampler(nn.Module):
@@ -58,23 +45,6 @@ class Upsampler(nn.Module):
         return x
 
 
-class Upsampler1(nn.Module):
-    def __init__(self, in_size, out_size, ker_size, stride, apply_dropout=False, final_act=True):
-        super().__init__()
-        self.conv_transpose = nn.ConvTranspose2d(in_size, out_size, ker_size, stride)
-        self.relu = nn.LeakyReLU(2)
-        self.dout = nn.Dropout(0.3)
-        self.d = apply_dropout
-        self.f_act = final_act
-
-    def forward(self, x):
-        x = self.conv_transpose(x)
-        x = self.relu(x)
-        if self.f_act:
-            x = self.relu(x)
-        if self.d:
-            x = self.dout(x)
-        return x
 
 
 class Generator(nn.Module):
@@ -112,23 +82,59 @@ class Generator(nn.Module):
         return x
 
 
+# new generator
+class Downsampler1(nn.Module):
+    def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_batchnorm=True):
+        super().__init__()
+        self.conv = nn.Conv2d(in_size, out_size, ker_size, stride, padding=padding)
+        self.lrelu = nn.LeakyReLU(2)
+        self.bnorm = nn.BatchNorm2d(out_size)
+        self.b = apply_batchnorm
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.lrelu(x)
+        if self.b:
+            x = self.bnorm(x)
+        return x
+
+
+class Upsampler1(nn.Module):
+    def __init__(self, in_size, out_size, ker_size, stride, apply_dropout=False, final_act=True):
+        super().__init__()
+        self.conv_transpose = nn.ConvTranspose2d(in_size, out_size, ker_size, stride)
+        self.relu = nn.LeakyReLU(2)
+        self.dout = nn.Dropout(0.3)
+        self.d = apply_dropout
+        self.f_act = final_act
+
+    def forward(self, x):
+        x = self.conv_transpose(x)
+        x = self.relu(x)
+        if self.f_act:
+            x = self.relu(x)
+        if self.d:
+            x = self.dout(x)
+        return x
+
+
 class Generator1(nn.Module):
     def __init__(self):
         super().__init__()
         self.down_stack = nn.ModuleList([
-            Downsampler1(3, 64, 4, 2, 1),  # (batch_size, 128, 128, 64)
+            Downsampler1(3, 64, 4, 2, 1, apply_batchnorm=False),  # (batch_size, 128, 128, 64)
             Downsampler1(64, 128, 4, 2, 1),  # (batch_size, 64, 64, 128)
             Downsampler1(128, 256, 4, 2, 1),  # (batch_size, 32, 32, 256)
             Downsampler1(256, 512, 4, 2, 1),  # (batch_size, 16, 16, 512)
             Downsampler1(512, 512, 3, 2, 1),  # (batch_size, 8, 8, 512)
-            Downsampler1(512, 512, 3, 2, 1, apply_batchnorm=True),  # (batch_size, 4, 4, 512)
-            Downsampler1(512, 512, 3, 1, apply_batchnorm=True),  # (batch_size, 2, 2, 512)
-            Downsampler1(512, 512, 2, 1),  # (batch_size, 1, 1, 512)
+            Downsampler1(512, 512, 3, 2, 1),  # (batch_size, 4, 4, 512)
+            Downsampler1(512, 512, 3, 1, apply_batchnorm=False),  # (batch_size, 2, 2, 512)
+            Downsampler1(512, 512, 2, 1, apply_batchnorm=False),  # (batch_size, 1, 1, 512)
         ])
         self.up_stack = nn.ModuleList([
-            Upsampler1(512, 512, 2, 1, apply_dropout=True),  # (batch_size, 2, 2, 512)
-            Upsampler1(1024, 512, 2, 2, apply_dropout=True),  # (batch_size, 4, 4, 512)
-            Upsampler1(1024, 512, 2, 2),  # (batch_size, 8, 8, 512)
+            Upsampler1(512, 512, 2, 1, apply_dropout=False),  # (batch_size, 2, 2, 512)
+            Upsampler1(1024, 512, 2, 2, apply_dropout=False),  # (batch_size, 4, 4, 512)
+            Upsampler1(1024, 512, 2, 2, apply_dropout=False),  # (batch_size, 8, 8, 512)
             Upsampler1(1024, 512, 2, 2),  # (batch_size, 16, 16, 512)
             Upsampler1(1024, 256, 2, 2),  # (batch_size, 32, 32, 256)
             Upsampler1(512, 128, 2, 2),  # (batch_size, 64, 64, 128)

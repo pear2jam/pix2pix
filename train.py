@@ -20,7 +20,7 @@ dis = tools.Discriminator()
 
 gen.train()
 
-data = dp.split(data, turned_add=False, rotate_add=False, part=1, info=True)
+data = dp.split(data, turned_add=False, rotate_add=False, part=0.5, info=True)
 
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -29,11 +29,11 @@ gen = dp.move_to(gen, device)
 dis = dp.move_to(dis, device)
 
 part = 1  # part of the data on which the model is training
-epochs = 10
+epochs = 4
 batch_size = 2
 
-lr_gen = 2e-4  # learning rates for generator and discriminator
-lr_dis = 2e-4
+lr_gen = 1e-4  # learning rates for generator and discriminator
+lr_dis = 1e-4
 
 
 backup = True  # make backups
@@ -74,13 +74,9 @@ for epoch in range(epochs):
         dis_loss.backward()
         dis_optim.step()
 
-
         gen_loss = loss.generator_loss(X, y, gen, dis)
         gen_loss.backward()
         gen_optim.step()
-
-
-
 
         del data, X, y
 

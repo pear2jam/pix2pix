@@ -140,7 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-        gen = torch.load('models/backup/backup_2.pth')
+        gen = torch.load('models/lgen.pth')
 
         gen = move_to(gen, device)
         gen.train()

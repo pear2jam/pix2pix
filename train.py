@@ -8,8 +8,6 @@ import tools.losses as loss  # для функций ошибки
 import torchvision.transforms as tt  # для обработки данных
 import time  # для оценки времени
 
-from matplotlib import pyplot as plt
-
 
 data = ImageFolder('./dataset/val', transform=tt.Compose([
   tt.ToTensor()
@@ -22,14 +20,13 @@ gen.train()
 
 data = dp.split(data, turned_add=False, rotate_add=False, part=0.5, info=True)
 
-
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 gen = dp.move_to(gen, device)
 dis = dp.move_to(dis, device)
 
 part = 1  # part of the data on which the model is training
-epochs = 4
+epochs = 2
 batch_size = 2
 
 lr_gen = 1e-4  # learning rates for generator and discriminator

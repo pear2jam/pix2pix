@@ -21,9 +21,6 @@ class Downsampler(nn.Module):
         return x
 
 
-
-
-
 class Upsampler(nn.Module):
     def __init__(self, in_size, out_size, first, second, apply_dropout=True, last_act=True):
         super().__init__()
@@ -43,8 +40,6 @@ class Upsampler(nn.Module):
         if self.apply_d:
             x = self.dout(x)
         return x
-
-
 
 
 class Generator(nn.Module):
@@ -180,9 +175,6 @@ class Discriminator(nn.Module):
         x = self.conv_5(x)
         x = self.sigmoid(x)
         return x
-
-
-# new generator
 
 
 

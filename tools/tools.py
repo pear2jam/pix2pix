@@ -22,12 +22,12 @@ class Downsampler(nn.Module):
 
 
 class Upsampler(nn.Module):
-    def __init__(self, in_size, out_size, first, second, apply_dropout=True, last_act=True):
+    def __init__(self, in_size, out_size, first, second, apply_dropout=False, last_act = True):
         super().__init__()
         self.conv_transpose1 = nn.ConvTranspose2d(in_size, out_size, first[0], first[1])
         self.conv_transpose2 = nn.ConvTranspose2d(out_size, out_size, second[0], second[1])
         self.relu = nn.LeakyReLU(2)
-        self.dout = nn.Dropout(0.2)
+        self.dout = nn.Dropout(0.5)
         self.apply_d = apply_dropout
         self.last_act = last_act
 
@@ -47,20 +47,20 @@ class Generator(nn.Module):
         super().__init__()
         self.down_stack = nn.ModuleList([
             Downsampler(3, 64, [4, 1], [4, 2], apply_batchnorm=False),  # (batch_size, 128, 128, 64)
-            Downsampler(64, 128, [4, 1], [3, 2], apply_batchnorm=False),  # (batch_size, 64, 64, 128)
-            Downsampler(128, 256, [4, 1], [4, 2], apply_batchnorm=False ),  # (batch_size, 32, 32, 256)
-            Downsampler(256, 512, [3, 1], [2, 2], apply_batchnorm=False),   # (batch_size, 12, 12, 512)
-            Downsampler(512, 512, [2, 1], [2, 2], apply_batchnorm=False),  # (batch_size, 5, 5, 512)
-            Downsampler(512, 512, [3, 1], [3, 1], apply_batchnorm=False),  # (batch_size, 1, 1, 512)
+            Downsampler(64, 128, [4, 1], [3, 2]),  # (batch_size, 64, 64, 128)
+            Downsampler(128, 256, [4, 1], [4, 2]),  # (batch_size, 32, 32, 256)
+            Downsampler(256, 512, [3, 1], [2, 2]),  # (batch_size, 12, 12, 512)
+            Downsampler(512, 512, [2, 1], [2, 2]),  # (batch_size, 5, 5, 512)
+            Downsampler(512, 512, [3, 1], [3, 1]),  # (batch_size, 4, 4, 512)
         ])
         self.up_stack = nn.ModuleList([
             Upsampler(512, 512, [3, 1], [3, 1]),  # (batch_size, 2, 2, 512)
             Upsampler(1024, 512, [3, 2], [2, 1]),  # (batch_size, 16, 16, 512)
-            Upsampler(1024, 256, [3, 2], [3, 1], apply_dropout=False),  # (batch_size, 32, 32, 256)
-            Upsampler(512, 128, [5, 2], [4, 1], apply_dropout=False),  # (batch_size, 64, 64, 128)
-            Upsampler(256, 64, [4, 2], [4, 1], apply_dropout=False),  # (batch_size, 128, 128, 64)
+            Upsampler(1024, 256, [3, 2], [3, 1]),  # (batch_size, 32, 32, 256)
+            Upsampler(512, 128, [5, 2], [4, 1]),  # (batch_size, 64, 64, 128)
+            Upsampler(256, 64, [4, 2], [4, 1]),  # (batch_size, 128, 128, 64)
         ])
-        self.final = Upsampler(128, 3, [5, 2], [4, 1], last_act=False, apply_dropout=False)  # (batch_size, 256, 256, 3)
+        self.final = Upsampler(128, 3, [5, 2], [4, 1], last_act=False)  # (batch_size, 256, 256, 3)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):  # x has shape: (batch_size, 256, 256, 3)

@@ -13,24 +13,23 @@ data = ImageFolder('./dataset/val', transform=tt.Compose([
   tt.ToTensor()
 ]))
 
-gen = tools.Generator1()
+gen = tools.Generator()
 dis = tools.Discriminator()
 
-gen.train()
 
-data = dp.split(data, turned_add=False, rotate_add=False, part=0.5, info=True)
+data = dp.split(data, turned_add=False, rotate_add=False, part=1, info=True)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 gen = dp.move_to(gen, device)
 dis = dp.move_to(dis, device)
 
-part = 1  # part of the data on which the model is training
-epochs = 2
+part = 0.1  # part of the data on which the model is training
+epochs = 10
 batch_size = 2
 
-lr_gen = 1e-4  # learning rates for generator and discriminator
-lr_dis = 1e-4
+lr_gen = 2e-4  # learning rates for generator and discriminator
+lr_dis = 2e-4
 
 
 backup = True  # make backups
@@ -46,8 +45,6 @@ x_loader = DataLoader(data[:part_learn], batch_size=batch_size, drop_last=True, 
 gen_optim = torch.optim.Adam(gen.parameters(), lr=lr_gen)
 dis_optim = torch.optim.Adam(dis.parameters(), lr=lr_dis)
 
-pics = 0
-
 gen_loss, dis_loss = 0, 0
 
 print(">>>>>>>>>>>>>")
@@ -56,9 +53,9 @@ print(f"images: {part_learn}")
 show_est_time = True
 start_time = time.time()
 for epoch in range(epochs):
+    epoch_start_time = time.time()
     if not show_est_time:
         print(">> ", epoch, " | ", sep="", end="")
-        print("from ", part_learn, "p : ", sep="", end="")
     for data in x_loader:
         data = dp.move_to(data, device)
         X = data[:, 0]
@@ -88,17 +85,13 @@ for epoch in range(epochs):
             print(f"batch: {batch_time}s")
             print(f"epoch: {epoch_time}s")
             print(f"total: {total_time}s")
-            print(">> ", epoch, " | ", sep="", end="")
-            print("from ", part_learn, "p : ", sep="", end="")
-
-        pics += batch_size
-        print(pics, end="p ")
+            print(">> ", epoch, " | ", sep="", end = "")
 
     if backup and (epoch + 1) % backup_rate == 0:
         torch.save(gen, "models/backup/backup_" + str(epoch // backup_rate) + ".pth")
+    print(f'finished with Gen Loss: {float(gen_loss)} '
+          f',Dis Loss: {float(dis_loss)} ({int(time.time()-epoch_start_time)}s)')
 
-    print()
-    print("finished with Gen Loss: ", float(gen_loss), " ,Dis Loss: ", float(dis_loss))
 
     pics = 0
 

@@ -20,11 +20,6 @@ def rotate(image, angle):
 
     return rot_x[0]
 
-
-def center_image(image):
-    return image * 2 - 1
-
-
 def random_transformation(image):
     rand_angle = torch.rand(1, dtype=torch.float) - 0.5  # from -0.5 to 0.5 radians
     if torch.rand(1, dtype=torch.float) > 0.5:
@@ -57,9 +52,6 @@ def split(x, part=1, info=True):
             total = i // part_len
 
         x_temp = x[i][0].unfold(2, 256, 256).permute(2, 0, 1, 3)
-
-        x_temp[0] = center_image(x_temp[0])
-        x_temp[1] = center_image(x_temp[1])
 
         x_data[i][0] = random_transformation(x_temp[0])
         x_data[i][1] = random_transformation(x_temp[1])

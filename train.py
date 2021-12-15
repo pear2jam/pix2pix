@@ -12,6 +12,7 @@ import time  # для оценки времени
 # CONFIGURATION
 # ----------------------
 data_path = './dataset/val'  # path of dataset folder
+transform = True  # random transformation of data
 
 gen_type = 1  # 0 - big, 1 - light
 
@@ -19,13 +20,13 @@ load_models = False  # load learned models and continue learning
 gen_path = './models/lgen.pth'  # generator path (for load_models = True)
 dis_path = './models/backup/backup_d0.pth'  # discriminator path (for load_models = True)
 
-part = 1  # part of the data on which the model is training [0; 1]
-epochs = 2
-batch_size = 32
+part = 0.2  # part of the data on which the model is training [0; 1]
+epochs = 15
+batch_size = 8
 max_steps = 2**32  # max steps of optimisation
 
-lr_gen = 2e-4  # learning rates for generator and discriminator
-lr_dis = 2e-4
+lr_gen = 1e-4  # learning rates for generator and discriminator
+lr_dis = 1e-4
 
 backup = False  # make backups
 backup_rate = 2  # how much epochs for another backup
@@ -49,7 +50,7 @@ else:
     gen = torch.load('models/lgen.pth', map_location='cpu')
     dis = torch.load('models/lgen.pth', map_location='cpu')
 
-data = dp.split(data, info=True)
+data = dp.split(data, transform=transform, info=True)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -62,7 +63,7 @@ part_learn = int(len(data) * part)
 if batch_size > part_learn:
     raise(Exception("Batch size more than data"))
 
-x_loader = DataLoader(data[:part_learn], batch_size=batch_size, drop_last=True, shuffle=True)
+x_loader = DataLoader(data[:part_learn], batch_size=batch_size, drop_last=False, shuffle=True)
 
 gen_optim = torch.optim.Adam(gen.parameters(), lr=lr_gen)
 dis_optim = torch.optim.Adam(dis.parameters(), lr=lr_dis)

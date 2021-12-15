@@ -9,7 +9,7 @@ def generator_loss(x, y, generator, discriminator):
     data = torch.cat((x, generated), 1)
     dis_data = discriminator(data)
     loss = torch.nn.BCELoss(reduction="mean")(dis_data, torch.ones_like(dis_data))
-    loss += torch.mean(torch.abs(generated - y)) * 50
+    loss += torch.mean(torch.abs(generated - y)) * 100
     return loss
 
 

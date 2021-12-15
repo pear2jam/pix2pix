@@ -79,10 +79,10 @@ class Generator(nn.Module):
 
 # new generator
 class Downsampler1(nn.Module):
-    def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_batchnorm=True):
+    def __init__(self, in_size, out_size, ker_size, stride, padding = 0, apply_batchnorm = True):
         super().__init__()
         self.conv = nn.Conv2d(in_size, out_size, ker_size, stride, padding=padding)
-        self.lrelu = nn.LeakyReLU(0.5)
+        self.lrelu = nn.LeakyReLU(2)
         self.bnorm = nn.BatchNorm2d(out_size)
         self.b = apply_batchnorm
 
@@ -95,21 +95,20 @@ class Downsampler1(nn.Module):
 
 
 class Upsampler1(nn.Module):
-    def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_dropout=False, final_act=True):
+    def __init__(self, in_size, out_size, ker_size, stride, padding=0, apply_dropout = False, final_act = True):
         super().__init__()
         self.conv_transpose = nn.ConvTranspose2d(in_size, out_size, ker_size, stride, padding=padding)
-        self.relu = nn.LeakyReLU(0.5)
+        self.relu = nn.LeakyReLU(2)
         self.dout = nn.Dropout(0.3)
         self.d = apply_dropout
         self.f_act = final_act
-
     def forward(self, x):
         x = self.conv_transpose(x)
         x = self.relu(x)
-        if self.d:
-            x = self.dout(x)
         if self.f_act:
             x = self.relu(x)
+        if self.d:
+            x = self.dout(x)
         return x
 
 
@@ -162,20 +161,24 @@ class Discriminator(nn.Module):
         self.conv_5 = nn.Conv2d(512, 1, 3, 1)
         self.relu = nn.LeakyReLU(2)
         self.sigmoid = nn.Sigmoid()
-
+        self.batchnorm = nn.BatchNorm2d(1, eps = 0)
     def forward(self, x):
         x = self.conv_1(x)
         x = self.relu(x)
+        #print(x.shape)
         x = self.conv_2(x)
         x = self.relu(x)
+        #print(x.shape)
         x = self.conv_3(x)
         x = self.relu(x)
+        #print(x.shape)
         x = self.conv_4(x)
         x = self.relu(x)
+        #print(x.shape)
         x = self.conv_5(x)
+        #print(x.shape)
         x = self.sigmoid(x)
         return x
-
 
 
 

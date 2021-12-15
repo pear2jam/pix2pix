@@ -134,7 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         image_in.save("temp_image.png")
         image_in = Image.open("temp_image.png").convert('RGB')
         ###
-        #image_in = Image.open("test.png").convert('RGB')
+        image_in = Image.open("test.png").convert('RGB')
 
         transforms = tf.Compose([tf.Resize(256), tf.ToTensor()])
         torch_image_in = transforms(image_in)

@@ -28,11 +28,12 @@ def random_transformation(image):
     return image
 
 
-def split(x, part=1, info=True):
+def split(x, part=1, transform=True, info=True):
     """
     splitting and adding variety to the dataset
     :param x: input data with shape (len(x), 3, 256, 512)
     :param part: part of x to use (float from 0 to 1)
+    :param transform: make random transformations of images
     :param info: print information about preparing process
     :raises ValueError: if part < 0 or part > 1
     :return: images data with shape (n*len(x), 2, 3, 256, 256)
@@ -52,9 +53,12 @@ def split(x, part=1, info=True):
             total = i // part_len
 
         x_temp = x[i][0].unfold(2, 256, 256).permute(2, 0, 1, 3)
-
-        x_data[i][0] = random_transformation(x_temp[0])
-        x_data[i][1] = random_transformation(x_temp[1])
+        if transform:
+            x_data[i][0] = random_transformation(x_temp[0])
+            x_data[i][1] = random_transformation(x_temp[1])
+        else:
+            x_data[i][0] = x_temp[0]
+            x_data[i][1] = x_temp[1]
 
     if info:
         print("100\nfinished")

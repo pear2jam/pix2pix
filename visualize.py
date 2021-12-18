@@ -134,7 +134,7 @@ class MainWindow(QtWidgets.QMainWindow):
         image_in.save("temp_image.png")
         image_in = Image.open("temp_image.png").convert('RGB')
         ###
-        image_in = Image.open("test.png").convert('RGB')
+        #image_in = Image.open("test.png").convert('RGB')
 
         transforms = tf.Compose([tf.Resize(256), tf.ToTensor()])
         torch_image_in = transforms(image_in)
@@ -144,9 +144,10 @@ class MainWindow(QtWidgets.QMainWindow):
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         gen = torch.load('models/lgen.pth', map_location='cpu')
         gen = move_to(gen, device)
+        #gen.eval()
         im_in = move_to(im_in, device)
         with torch.no_grad():
-            image_out = gen(im_in)[0]
+            image_out = gen(im_in*2-1)[0]
 
         image_out = tf.Resize(320)(image_out)
 

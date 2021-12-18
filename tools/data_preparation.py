@@ -3,6 +3,7 @@ data preparing module
 """
 import torch
 import torch.nn.functional as tf
+import torchvision.transforms as tt
 import warnings
 from tools.misc import get_rotate_matrix
 
@@ -20,11 +21,16 @@ def rotate(image, angle):
 
     return rot_x[0]
 
+
+def crop(image):
+    return tt.RandomResizedCrop(size=[256, 256], scale=[0.89, 1])(image)  # 0.89 ~ 256/289
+
 def random_transformation(image):
     rand_angle = torch.rand(1, dtype=torch.float) - 0.5  # from -0.5 to 0.5 radians
     if torch.rand(1, dtype=torch.float) > 0.5:
         image = flip(image)
     image = rotate(image, rand_angle)
+    image = crop(image)
     return image
 
 

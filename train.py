@@ -125,3 +125,4 @@ for epoch in range(epochs):
 
 torch.save(gen, 'models/gen.pth')
 torch.save(gen, 'models/dis.pth')
+#torch

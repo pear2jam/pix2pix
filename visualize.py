@@ -133,8 +133,6 @@ class MainWindow(QtWidgets.QMainWindow):
         image_in = self.label.pixmap().toImage()
         image_in.save("temp_image.png")
         image_in = Image.open("temp_image.png").convert('RGB')
-        ###
-        #image_in = Image.open("test.png").convert('RGB')
 
         transforms = tf.Compose([tf.Resize(256), tf.ToTensor()])
         torch_image_in = transforms(image_in)
@@ -142,9 +140,9 @@ class MainWindow(QtWidgets.QMainWindow):
         im_in[0], im_in[1] = torch_image_in, torch_image_in
         torch_image_in = torch_image_in.view(1, 3, 256, 256)
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        gen = torch.load('models/lgen.pth', map_location='cpu')
+        gen = torch.load('models/gen.pth', map_location='cpu')
         gen = move_to(gen, device)
-        #gen.eval()
+        gen.eval()
         im_in = move_to(im_in, device)
         with torch.no_grad():
             image_out = gen(im_in*2-1)[0]

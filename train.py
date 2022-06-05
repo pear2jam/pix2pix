@@ -20,16 +20,16 @@ load_models = False  # load learned models and continue learning
 gen_path = './models/lgen.pth'  # generator path (for load_models = True)
 dis_path = './models/backup/backup_d0.pth'  # discriminator path (for load_models = True)
 
-part = 0.2  # part of the data on which the model is training [0; 1]
-epochs = 15
-batch_size = 8
+part = 0.4  # part of the data on which the model is training [0; 1]
+epochs = 20
+batch_size = 16
 max_steps = 2**32  # max steps of optimisation
 
-lr_gen = 1e-4  # learning rates for generator and discriminator
-lr_dis = 1e-4
+lr_gen = 1.5e-4  # learning rates for generator and discriminator
+lr_dis = 0.8e-4
 
-backup = False  # make backups
-backup_rate = 2  # how much epochs for another backup
+backup = True  # make backups
+backup_rate = 11  # how much epochs for another backup
 backup_dis = False  # save discriminator in backup
 
 show_est_time = True  # estimate learning time on start
@@ -123,4 +123,5 @@ for epoch in range(epochs):
     print(f'finished with Gen Loss: {float(gen_loss)} '
           f',Dis Loss: {float(dis_loss)} ({int(time.time()-epoch_start_time)}s)')
 
-torch.save(gen, 'models/lgen.pth')
+torch.save(gen, 'models/gen.pth')
+torch.save(gen, 'models/dis.pth')

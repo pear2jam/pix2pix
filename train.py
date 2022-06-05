@@ -124,3 +124,4 @@ for epoch in range(epochs):
           f',Dis Loss: {float(dis_loss)} ({int(time.time()-epoch_start_time)}s)')
 
 torch.save(gen, 'models/lgen.pth')
+torch.save(dis, 'models/dis.pth')
